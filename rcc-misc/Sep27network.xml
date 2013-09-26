@@ -1,0 +1,102 @@
+
+<LemsLiteNetwork>
+
+
+
+<ComponentArray name="pop1" component="cell1" size="200">
+
+    <!--  'i' is defined for all items in the population and can
+     be used in other expressions -->
+    
+	<InstanceTransients>
+		<!--  these are things that are used for set up but don't need to be 
+				stored while running. The instance properties can depend on these,
+				as well as any connection properties -->
+		<Property name="x" value="0.1 * (i / 50)"/>
+		<Property name="y" value="0.1 * floor(i / 50)"/>
+		<Property name="h" value="1 + 0.5 * random()"/>
+	</InstanceTransients>
+
+
+	<InstanceProperties>
+		<!--  these are needed while running: they have a 'parameter' attribute
+		which refers to a parameter that must be defined in the component model,
+		as opposed to the 'name' parameter for the transients that adds a new 
+		named variable to the scope -->
+	
+		
+		<Property parameter="p1" value="2"/>
+		
+		<Property parameter="p2">
+			<listElement file="p1values.txt" index="i"/>
+		</Property>
+
+		<Property parameter="p3">
+			<listElement values="1,2,3,4" index="i % 4"/>
+		</Property>
+
+		<Property parameter="p4">
+			<randomSample>
+				<explicitDistribution parameter="x" density="1 / (1 + x^2)"/>
+			</randomSample>
+		</Property>
+			
+		<Property parameter="p5">
+			<randomSample>
+				<uniformDistribution min="1" max="2"/>
+			</randomSample>
+		</Property>
+			
+	</InstanceProperties>
+
+</ComponentArray>
+
+
+
+
+
+ 
+ <Connections from="pop1" to="pop2">
+ 	  <SorceTargetSelection>
+ 		<AllAllSelector indexOrder="source"/>
+ 		<!--  to assign an index to each connection, we need to know whether to 
+ 		iterate over sources or targets for the outer loop -->
+ 	  </SorceTargetSelection>
+
+	  <ConnectionProperties>
+			<!--  here, i_source, i_target and i_connection are always available.
+			i_connnection assumes a reproducible ordering of connections -->
+
+
+	  	 <Property parameter="delay">
+	  	 	<randomSample>
+				<uniformDistribution min="1" max="2"/>
+			</randomSample>
+			<!--  or any of the other things that can go inside a property -->
+	  	 </Property>
+	  	 
+	  	 <Property name="weight">
+	  	 	<listElement file="p1values.txt" row="i_source" column="i_target"/>
+	  	 </Property>
+	  
+	  
+	  	<Property name="x">
+	  		<listElement file="p1values.txt" index="i_connection"/>
+	  	</Property>
+	  	
+	  	<Property name="a" value="(source.x - target.x)"/>
+	  		
+		
+	  	<var dx = "source.x - target.x"/>
+	  	<var dy = "source.y - target.y"/>
+	  	<var d = "sqrt(dx * dx + dy * dy)"/>
+	  		
+	  	<Property name="b" value="0.5 * d"/>
+	  
+	  </ConnectionProperties>
+ 		
+	 
+ </Connections>
+
+
+</LemsLiteNetwork>
