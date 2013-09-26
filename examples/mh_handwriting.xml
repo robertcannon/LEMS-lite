@@ -1,0 +1,131 @@
+
+
+
+<DiscreteUpdateComponent id="lif_neuron">
+
+    <Interface>
+
+    <Parameter name="gain"/>
+    <Parameter name="bias"/>
+    <Parameter name="const_i"/>
+
+    <Constant name="pstc_scale" value="" />
+
+    <InputEventPort name="spike-in">
+        <parameter name='weight'/>
+    </InputEventPort>
+    
+	<OutputEventPort name="spike-out"/> 
+        <AccumulatingInputVariable name="i_tot"/>
+	<InputVariable name="i_in"/>
+        <OutputVariable name="rec1"/>
+        <!-- maybe expose all the state, or have a flag to say whether it is exposed or not -->
+    </Interface>
+
+    
+
+    <State>    	
+        <StateVariable name="v" exposed="true"/>
+        <StateVariable name="t_last" exposed="true"/>
+        <StateVariable name='g_syn'/>
+    </State>       
+
+
+    <Step>
+       
+       <var name="i_inj" value=" (gain * (i_syn+const_i) ) + bias "/>
+
+       <var name="dv_dt" value=" ( (t-t_last) > t_refrac ) ? (1/C * ( i_inj - gm * V) ) : 0  "/>
+       <var name="disyn_dt" value="-1.0 * i_syn / syn_tau  "/>
+       <var name="vpr" value="v"/>
+
+       <!-- conditions evaluated here -->
+       
+       <update variable="v" value="(v + (d_v_dt * dt))"/>
+       <update variable="i_syn" value="(i_syn + (disyn_dt * dt))"/>
+       
+    </Step>
+     
+     <OnCondition if="vpr .lt. threshold && v .gt. threshold">
+	<emit port="spike-out"/>
+        <update variable="v" value="v_reset"/>
+     </OnCondition>
+
+     <OnEvent port="spike-in">
+        <update variable="i_syn" value="isyn + (weight * pstc_scale)"/>
+     </OnEvent>
+</DiscreteUpdateComponent>
+
+
+<DiscreteUpdateComponent id="pixel">
+
+    <Interface>
+        <Parameter name="intensity"/>
+        <OutputVariable name="intensity"/>
+    </Interface>
+
+    <State>
+        <!-- None -->
+    </State>       
+
+    <Step>
+       <!-- No actions -->
+       <output variable="intensity" value="intensity"/>
+    </Step>
+</DiscreteUpdateComponent>
+
+
+
+
+
+
+<lemslite_network>
+
+  <!-- Source Image: --> 
+  <component_array size="784" label="src_image" component="pixel">
+    <set_param name='intensity' mode='per-instance'>
+        <from_flat_file filename='img.txt'> </from_flat_file>
+    </set_param>
+  </component_array>
+
+  <!-- Each of the 4 layers: --> 
+  <component_array size="1000" label="L1" component="lif_neuron">
+    <set_param name='bias' mode='per-instance'>
+        <from_flat_file filename='b1.txt'> </from_flat_file>
+    </set_param>
+  </component_array>
+
+  <component_array size="500" label="L2" component="lif_neuron">
+    <set_param name='bias' mode='per-instance'>
+        <from_flat_file filename='b2.txt'> </from_flat_file>
+    </set_param>
+  </component_array>
+
+    <component_array size="300" label="L3" component="lif_neuron">
+    <set_param name='bias' mode='per-instance'>
+        <from_flat_file filename='b3.txt'> </from_flat_file>
+    </set_param>
+  </component_array>
+
+    <component_array size="50" label="L4" component="lif_neuron">
+    <set_param name='bias' mode='per-instance'>
+        <from_flat_file filename='b4.txt'> </from_flat_file>
+    </set_param>
+  </component_array>
+
+
+  <!-- And the connections between them: -->
+  <event_connection_set source="id000:on_emit_event" target="id004:on_recv_ampa_event" id="id006" label="None">
+    <delay>
+      <FixedDelay delay="fixed:0"/>
+    </delay>
+    <parameter_map>
+      <connect dst_param="weight" value="fixed:10.0"/>
+    </parameter_map>
+    <connector>
+      <PyNN:FromListConnector connections="[]"/>
+    </connector>
+  </event_connection_set>  
+  
+  
+</lemslite_network>
