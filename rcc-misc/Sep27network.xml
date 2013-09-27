@@ -15,7 +15,12 @@
 		<Property name="x" value="0.1 * (i / 50)"/>
 		<Property name="y" value="0.1 * floor(i / 50)"/>
 		<Property name="h" value="1 + 0.5 * random()"/>
-	</InstanceTransients>
+		
+		
+		<Property name="m">
+			<listElement file="p1values.txt" index="i"/>
+		</Property>
+	</InstanceTransients> 
 
 
 	<InstanceProperties>
