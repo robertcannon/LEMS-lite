@@ -1,0 +1,245 @@
+
+<!-- Builtin functions:
+
+A?B:C, (for v2)
+'and' 'or' 'not'?
+
+abs, clip
+floor, ceil, round,
+sin cos, tan
+sqrt, power (^)?, exp, log (=log10), ln, 
+
+uniform(), gaussian/normal(), 
+
+clip(x,min,max) = 
+
+
+
+
+
+
+
+<LemsLiteNetwork>
+
+
+
+<ComponentArray name="pop1" component="cell1" size="200">
+
+    <!--  'i' is defined for all items in the population and can
+     be used in other expressions -->
+    
+    
+
+	<BuildtimeProperties>
+		<!--  these are things that are used for set up but don't need to be 
+				stored while running. The instance properties can depend on these,
+				as well as any connection properties -->
+
+        <!-- Things that can be used are: 'i' or 'N' -->
+        
+		<var name="x" value="0.1 * (i / 50)"/>
+		<var name="y" value="0.1 * floor(i / 50) + x"/>
+		<var name="h" value="1 + 0.5 * random()"/>
+
+
+        <!-- Either of these is OK: -->
+        <var name="x" value="0.1 * (i / 50)"/>
+        <var name="x"> <from_expression value="0.1 * (i / 50)"/> </var>
+		
+		<var name="m"> <from_file name="p1values.txt" format='flat' index="i"/> </var>
+        <var name="x"> <from_list values="[1,2,3,]"/> </var>
+		
+	</BuildtimeProperties> 
+
+
+	<RuntimeProperties>
+		<!--  these are needed while running: they have a 'parameter' attribute
+		which refers to a parameter that must be defined in the component model,
+		as opposed to the 'name' parameter for the transients that adds a new 
+		named variable to the scope -->
+
+         <!-- Things that can be used are: 'i' or 'N' -->
+    
+		<let parameter="p1" value="2"/>
+		<let parameter="p2"><from_file file="p1values.txt" index="i"/></let>
+		<let parameter="p3"><from_list values="1,2,3,4" index="i % 4"/></let>
+
+        <let parameter="p1" value="x -i +N +m"/>
+			
+	</RuntimeProperties>
+
+
+    
+
+</ComponentArray>
+
+
+
+
+
+
+<DiscreteUpdateComponent id="hh_cell1">
+
+    <Interface>
+	<Parameter name="p"/>
+        <InputEventPort name="spike-in">
+            <Parameter name="weight"/>
+        </InputEventPort>
+            
+	    <OutputEventPort name="spike-out"/> 
+        <AccumulatingInputVariable name="i_tot"/>
+	    <InputVariable name="i_in"/>
+        <OutputVariable name="rec1"/>
+        <!-- maybe expose all the state, or have a flag to say whether it is exposed or not -->
+    </Interface>
+
+
+    <State>    	
+        <StateVariable name="v" exposed="true"/>
+        <StateVariable name="popna_na_m_x"/>
+        <StateVariable name="popna_na_h_x"/>
+        <StateVariable name="popk_k_n_x"/>
+        <StateVariable name="gsyn"/>
+    </State>       
+
+
+    <Step> 
+       <var name="popna_na_m_Reverse_r" value="(p * exp(((v -0.065) / -0.018000000000000002)))"/>
+       <var name="popna_na_m_Forward_x" value="((v - -0.04) / 0.01)"/>
+       <var name="popna_na_m_Forward_r" value="(1000.0 *(popna_na_m_Forward_x / (1.0 - exp((0.0 - popna_na_m_Forward_x)))))"/>
+       <var name="d_v_dt" value="((totcurrent + 4.0E-12) / 1.0E-12)"/>
+   
+       <var name="vpr" value="v"/>
+  
+       <update variable="popna_na_m_x" value="(popna_na_m_x + (d_popna_na_m_x_dt * dt))"/>
+       <update variable="popna_na_h_x" value="(popna_na_h_x +(d_popna_na_h_x_dt * dt))"/>
+       <update variable="popk_k_n_x" value="(popk_k_n_x +(d_popk_k_n_x_dt * dt))"/>
+       <update variable="v" value="(v + (d_v_dt * dt))"/>
+      
+       <output variable="rec1" value="dv_dt"/>
+      
+    </Step>
+     
+     <OnCondition if="vpr .lt. threshold && v .gt. threshold">
+	    <emit port="spike-out"/>
+        <update variable="v" value="reset"/>
+        <update variable="v2" value="v + uniform()"/>
+     </OnCondition>
+
+     <OnEvent port="spike-in">
+        <update variable="gsyn" value="gsyn + weight"/>
+     </OnEvent>
+</DiscreteUpdateComponent>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ <Connections from="pop1:on_spike" to="pop2:on_recv_ampa_spike"  >
+ 	  <SourceTargetSelection>
+ 		<AllAllSelector />
+ 		<!--  to assign an index to each connection, we need to know whether to 
+ 		iterate over sources or targets for the outer loop -->
+ 	  </SourceTargetSelection>
+
+    
+	<Parameter name="weight"/>
+
+	  <RuntimeProperties>
+			<!--  here, i_source, i_target and i_connection are always available.
+			i_connnection assumes a reproducible ordering of connections -->
+
+
+
+	  	 <var name="weight">
+	  	 	<from_file file="p1values.txt" row="i_source" column="i_target"/>
+	  	 </var>
+	  
+	  
+	  	<var name="x">
+	  		<from_list file="p1values.txt" index="i_connection"/>
+	  	</var>
+	  	
+	  	<Property name="a" value="(source.x - target.x)"/>
+	  		
+		
+	  	<var dx = "source.x - target.x"/>
+	  	<var dy = "source.y - target.y"/>
+	  	<var d = "sqrt(dx * dx + dy * dy)"/>
+
+
+        <let parameter="target.weight" value="weight"/>
+
+            
+	  </RuntimeProperties>
+
+
+
+    <event_properties>
+      <let parameter="target.weight" value="conn.weight"/>
+      <delay value=1>
+    </event_properties>
+    
+
+        
+            
+	 
+ </Connections>
+
+
+<!-- for comparison -->
+        <let parameter="p1" value="2"/>
+		<let parameter="p2"><from_file file="p1values.txt" index="i"/></let>
+		<let parameter="p3"><from_list values="1,2,3,4" index="i % 4"/></let>
+        <!--  -->
+
+<!--
+in the following connectors, the 
+src.property
+
+<connections>
+  <AllToAllConnector allow_self_connections> implicit ordering by "source", then "target"
+  <OneToOneConnector>
+  <FixedProbabilityConnector p_connect, allow_self_connections=True>
+  <FixedNumberPreConnector n, allow_self_connections=True,>
+  <FixedNumberPostConnector n, allow_self_connections=True,>
+  <DistanceDependentProbabilityConnector>
+  <FromListConnector>
+  <FromFileConnector>
+  <CSAConnector>
+
+  <PairwiseBooleanExpression if='i<j' index_order=>
+  <PairwiseProbabilisticExpression p=' '>
+
+  <StevesMondoConnector>
+      
+</connections>
+
+
+
+
+
+
+
+</LemsLiteNetwork>

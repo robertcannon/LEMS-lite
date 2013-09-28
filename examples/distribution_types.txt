@@ -1,0 +1,116 @@
+
+
+
+
+uniform()
+gaussian()
+
+
+<from_expression sample="0.5" />
+<from_expression sample="sin((i,j)) + uniform(a,b)" />
+<from_list values="[]" />
+<from_file format='flat' filename="" />
+
+<connect dst_param="weight" value="from_file:my_weights.txt"/>
+<connect dst_param="weight" value="from_list:my_weights.txt"/>
+<connect dst_param="weight" value="from_expression:my_weights.txt"/>
+<connect dst_param="weight" value="fixed:1.0"/>
+
+
+
+
+<connections>
+  <PyNN:AllToAllConnector allow_self_connections>
+  <PyNN:OneToOneConnector>
+  <PyNN:FixedProbabilityConnector p_connect, allow_self_connections=True>
+  <PyNN:FixedNumberPreConnector n, allow_self_connections=True,>
+  <PyNN:FixedNumberPostConnector n, allow_self_connections=True,>
+  <PyNN:DistanceDependentProbabilityConnector>
+  <PyNN:FromListConnector>
+  <PyNN:FromFileConnector>
+  <PyNN:CSAConnector>
+
+  <PairwiseBooleanExpression >
+  <PairwiseProbabilisticExpression>
+  
+  <StevesMondoConnector>
+</connections>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<connect dst_param="weight">
+<from_expression>
+ <set name='x' value='uniform(0,2)'>
+ <set name='y' value='uniform(0,5)'>
+ <set name='z' value='x+y'>
+ <return name='z'>
+</from_expression>
+
+<from_expression sample="sin((i,j)) + uniform(a,b)" />
+
+
+
+    
+<component_array size="236" label="dINs" id="id001" component_name="din.xml">
+<setup_working_params>
+    <var name="position_x", value="i* dx + uniform(0,1) >
+<setup_working_params/>
+</compnent_array>
+
+<connection_set >
+
+<connections>
+    <ExpressionConnector connect_if="abs($1:position_x-2.position_x) < 0.1">
+
+    <MySuperEfficentBlahConnector>
+    
+</connections>
+
+
+
+<setup_working_params>
+   <var name="dist" value="$1:position_x-"2.position_x">
+</set_working_params>
+<set_params name='weight' value = "0.5 * 1/dist" />
+
+
+
+
+</connection_set >
+
+
+
+
+
+
+
+ 
+Java:
+MyRandomFuncs.uniform()
+
+float uniform(float a,float b)
+{
+
+}
