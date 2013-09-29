@@ -8,22 +8,22 @@
     <!--  'i' is defined for all items in the population and can
      be used in other expressions -->
     
-	<InstanceTransients>
+	<BuildtimeProperties>
 		<!--  these are things that are used for set up but don't need to be 
 				stored while running. The instance properties can depend on these,
 				as well as any connection properties -->
-		<Property name="x" value="0.1 * (i / 50)"/>
-		<Property name="y" value="0.1 * floor(i / 50)"/>
-		<Property name="h" value="1 + 0.5 * random()"/>
+		<var name="x" value="0.1 * (i / 50)"/>
+		<var name="y" value="0.1 * floor(i / 50)"/>
+		<var name="h" value="1 + 0.5 * random()"/>
 		
 		
-		<Property name="m">
-			<listElement file="p1values.txt" index="i"/>
-		</Property>
-	</InstanceTransients> 
+		<var name="m">
+			<fromFile file="p1values.txt" index="i"/>
+		</var>
+	</BuildtimeProperties> 
 
 
-	<InstanceProperties>
+	<RuntimeProperties>
 		<!--  these are needed while running: they have a 'parameter' attribute
 		which refers to a parameter that must be defined in the component model,
 		as opposed to the 'name' parameter for the transients that adds a new 
@@ -52,7 +52,7 @@
 			</randomSample>
 		</Property>
 			
-	</InstanceProperties>
+	</RuntimeProperties>
 
 </ComponentArray>
 

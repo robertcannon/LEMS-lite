@@ -4,7 +4,7 @@
 <DiscreteUpdateComponent id="hh_cell1">
 
     <Interface>
-	<Parameter name="p"/>
+	    <Parameter name="p"/>
         <InputEventPort name="spike-in"/>
 	    <OutputEventPort name="spike-out"/> 
         <AccumulatingInputVariable name="i_tot"/>
