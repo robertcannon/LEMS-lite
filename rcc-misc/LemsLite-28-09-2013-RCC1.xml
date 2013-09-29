@@ -54,21 +54,24 @@ may want to copy these files around, with each knowing the offset for its cells 
 
         <!-- Either of these is OK: -->
         <var name="x" value="0.1 * (i / 50)"/>
+        
+        <!-- RCC, for the more verbose form, something that involves  
+        ' expression="0.1 * v"' would be better here -->
         <var name="x"> <from_expression value="0.1 * (i / 50)"/> </var>
 
+		<!--  ? -->
+		<var name="x"><evaluate expression="0.1 * (i / 50)"/></var>
+
+
 		<!-- RCC: on reflection, I don't think this is right. Having a 
-		file name in a component array definition makes it very fragile: without that 
-		file, noone can reproduce it.
-		I think we _do_ need a layer of indirection after all. -->
+		file name in a component array definition makes it rather fragile, 
+		so I think we _do_ need a layer of indirection after all. -->
 		<var name="m"><fixed_values source="nengo_letter_recognition1_pop1_m"/></var>
 				
 		<!--  and then, we need a "<Sources>" block in the LemtLiteNetwork to 
 		define the files that these things come from. -->
 				
 				
-		<!--  to be removed -->
-		<var name="m"> <from_file name="p1values.txt" format='flat' index="i"/> </var>
-
         <var name="x"> <from_list values="[1,2,3,]"/> </var>
 		
 	</BuildtimeProperties> 
