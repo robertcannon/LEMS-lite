@@ -1,0 +1,56 @@
+<DiscreteUpdateComponent>
+    <Interface>
+        <OutputVariable name="v"/>
+    </Interface>
+
+
+    <State>
+        <StateVariable name="v"/>
+        <StateVariable name="popna_na_m_x"/>
+        <StateVariable name="popna_na_h_x"/>
+        <StateVariable name="popk_k_n_x"/>
+    </State>
+
+
+    <Step>
+        <var name="popna_na_m_Reverse_r" value="(4000.0 * exp(((v - -0.065) / -0.018000000000000002)))"/>
+        <var name="popna_na_m_Forward_x" value="((v - -0.04) / 0.01)"/>
+        <var name="popna_na_m_Forward_r" value="(1000.0 * (popna_na_m_Forward_x / (1.0 - exp((0.0 - popna_na_m_Forward_x)))))"/>
+        <var name="popna_na_m_ex" value="exp(popna_na_m_x)"/>
+        <var name="popna_na_m_q" value="(popna_na_m_ex / (1.0 + popna_na_m_ex))"/>
+        <var name="popna_na_m_fcond" value="(popna_na_m_q ^ 3.0)"/>
+        <var name="popna_na_h_Reverse_r" value="(1000.0 / (1.0 + exp((0.0 - ((v - -0.035) / 0.01)))))"/>
+        <var name="popna_na_h_Forward_r" value="(70.0 * exp(((v - -0.065) / -0.02)))"/>
+        <var name="popna_na_h_ex" value="exp(popna_na_h_x)"/>
+        <var name="popna_na_h_q" value="(popna_na_h_ex / (1.0 + popna_na_h_ex))"/>
+        <var name="popna_na_h_fcond" value="(popna_na_h_q ^ 1.0)"/>
+        <var name="popna_na_gatefeff" value="((1.0 * popna_na_m_fcond) * popna_na_h_fcond)"/>
+        <var name="popna_na_g" value="(2.0E-11 * popna_na_gatefeff)"/>
+        <var name="popna_geff" value="(popna_na_g * 6000.0)"/>
+        <var name="popna_current" value="(popna_geff * (0.05 - v))"/>
+        <var name="popk_k_n_Reverse_r" value="(125.0 * exp(((v - -0.065) / -0.08)))"/>
+        <var name="popk_k_n_Forward_x" value="((v - -0.055) / 0.01)"/>
+        <var name="popk_k_n_Forward_r" value="(100.0 * (popk_k_n_Forward_x / (1.0 - exp((0.0 - popk_k_n_Forward_x)))))"/>
+        <var name="popk_k_n_ex" value="exp(popk_k_n_x)"/>
+        <var name="popk_k_n_q" value="(popk_k_n_ex / (1.0 + popk_k_n_ex))"/>
+        <var name="popk_k_n_fcond" value="(popk_k_n_q ^ 4.0)"/>
+        <var name="popk_k_gatefeff" value="(1.0 * popk_k_n_fcond)"/>
+        <var name="popk_k_g" value="(2.0E-11 * popk_k_gatefeff)"/>
+        <var name="popk_geff" value="(popk_k_g * 1800.0)"/>
+        <var name="popk_current" value="(popk_geff * (-0.077 - v))"/>
+        <var name="totcurrent" value="((0.0 + popna_current) + popk_current)"/>
+        <var name="d_popna_na_m_x_dt" value="((((1.0 + popna_na_m_ex) ^ 2.0) / popna_na_m_ex) * ((popna_na_m_Forward_r * (1.0 - popna_na_m_q)) - (popna_na_m_Reverse_r * popna_na_m_q)))"/>
+        <var name="d_popna_na_h_x_dt" value="((((1.0 + popna_na_h_ex) ^ 2.0) / popna_na_h_ex) * ((popna_na_h_Forward_r * (1.0 - popna_na_h_q)) - (popna_na_h_Reverse_r * popna_na_h_q)))"/>
+        <var name="d_popk_k_n_x_dt" value="((((1.0 + popk_k_n_ex) ^ 2.0) / popk_k_n_ex) * ((popk_k_n_Forward_r * (1.0 - popk_k_n_q)) - (popk_k_n_Reverse_r * popk_k_n_q)))"/>
+        <var name="d_v_dt" value="((totcurrent + 4.0E-12) / 1.0E-12)"/>
+
+        <update variable="popna_na_m_x" value="(popna_na_m_x + (d_popna_na_m_x_dt * dt))"/>
+        <update variable="popna_na_h_x" value="(popna_na_h_x + (d_popna_na_h_x_dt * dt))"/>
+        <update variable="popk_k_n_x" value="(popk_k_n_x + (d_popk_k_n_x_dt * dt))"/>
+        <update variable="v" value="(v + (d_v_dt * dt))"/>
+
+        <output variable="v" value="v"/>
+    </Step>
+
+
+</DiscreteUpdateComponent>

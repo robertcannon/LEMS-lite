@@ -1,0 +1,205 @@
+
+<!-- Builtin functions:
+
+A?B:C, (for v2)
+'and' 'or' 'not'?
+
+abs, clip
+floor, ceil, round,
+sin cos, tan
+sqrt, power (^)?, exp, log (=log10), ln, 
+
+uniform(), gaussian/normal(), 
+
+clip(x,min,max) = 
+
+-->
+
+
+
+
+
+
+<LemsLiteNetwork>
+
+
+<!--  define all the external references here, so the processor knows what
+to expect. Eg, if we're distributing the instantiation across different nodes, we 
+may want to copy these files around, with each knowing the offset for its cells -->
+<DataSources>
+	<File name="misc1.txt" format="csv">
+		<Array name="weights1" column="1"/>
+		<Array name="delays" column="2"/>
+	</File>
+</DataSources>
+
+
+
+<ComponentArray name="pop1" component="cell1" size="200">
+    <!--  Populations are always indexed.
+      'i' is defined for all items in the population and can
+     be used in other expressions -->
+    
+	<BuildtimeProperties>
+		<!--  these are things that are used for set up but don't need to be 
+				stored while running. The instance properties can depend on these,
+				as well as any connection properties -->
+
+        <!-- Things that can be used are: 'i' or 'N' -->
+        
+		<var name="x" value="0.1 * (i / 50)"/>
+		<var name="y" value="0.1 * floor(i / 50) + x"/>
+		<var name="h" value="1 + 0.5 * random()"/>
+
+
+        <!-- Either of these is OK: -->
+        <var name="x" value="0.1 * (i / 50)"/>
+        <var name="x"> <from_expression value="0.1 * (i / 50)"/> </var>
+
+		<!-- RCC: on reflection, I don't think this is right. Having a 
+		file name in a component array definition makes it very fragile: without that 
+		file, noone can reproduce it.
+		I think we _do_ need a layer of indirection after all. -->
+		<var name="m"><fixed_values source="nengo_letter_recognition1_pop1_m"/></var>
+				
+		<!--  and then, we need a "<Sources>" block in the LemtLiteNetwork to 
+		define the files that these things come from. -->
+				
+				
+		<!--  to be removed -->
+		<var name="m"> <from_file name="p1values.txt" format='flat' index="i"/> </var>
+
+        <var name="x"> <from_list values="[1,2,3,]"/> </var>
+		
+	</BuildtimeProperties> 
+
+
+	<RuntimeProperties>
+		<!--  these are needed while running: they have a 'parameter' attribute
+		which refers to a parameter that must be defined in the component model,
+		as opposed to the 'name' parameter for the transients that adds a new 
+		named variable to the scope -->
+
+         <!-- Things that can be used are: 'i' or 'N' -->
+    
+		<let parameter="p1" value="2"/>
+		<let parameter="p2"><from_file file="p1values.txt" index="i"/></let>
+		<let parameter="p3"><from_list values="1,2,3,4" index="i % 4"/></let>
+
+        <let parameter="p1" value="x -i +N +m"/>
+			
+	</RuntimeProperties>
+
+
+    
+
+</ComponentArray>
+
+
+
+
+
+<!--  RCC, I don't think we want "pop1:on_spike", jus "pop1", with elements for 
+the ports: -->
+ <Connections from="pop1" to="pop2">
+ 	<EventSource port="on_spike"/>
+	<EventTarget port="on_recv_ampa"/>
+</Connections>
+
+
+
+ 
+ <Connections from="pop1:on_spike" to="pop2:on_recv_ampa_spike"  >
+ 	  <SourceTargetSelection>
+ 		<AllAllSelector />
+ 		<!--  to assign an index to each connection, we need to know whether to 
+ 		iterate over sources or targets for the outer loop -->
+ 	  </SourceTargetSelection>
+
+    
+	<Parameter name="weight"/>
+
+	  <RuntimeProperties>
+			<!--  here, i_source, i_target and i_connection are always available.
+			i_connnection assumes a reproducible ordering of connections -->
+
+
+
+	  	 <var name="weight">
+	  	 	<from_file file="p1values.txt" row="i_source" column="i_target"/>
+	  	 </var>
+	  
+	  
+	  	<var name="x">
+	  		<!--  as above, reference to an item in the "DataSources" block -->
+	  		<from_list file="p1values.txt" index="i_connection"/>
+	  	</var>
+	  	
+	  	<Property name="a" value="(source.x - target.x)"/>
+	  		
+		
+	  	<var dx = "source.x - target.x"/>
+	  	<var dy = "source.y - target.y"/>
+	  	<var d = "sqrt(dx * dx + dy * dy)"/>
+
+
+        <let parameter="target.weight" value="weight"/>
+
+            
+	  </RuntimeProperties>
+
+
+
+    <event_properties>
+    	<!--  RCC I don't think this is a "let": we're saying,  "the receiver 
+    	defines a 'weight' property which must be supplied with each event. This is 
+    	just the fixed weight property of the connection" (in effect, its a triple line 
+    	'equals' not a normal double-line 'equals').  -->
+   	  <let parameter="target.weight" value="conn.weight"/>
+   
+   
+   	<!--  how about 'fix' in this case? -->
+      <fix parameter="target.weight" value="conn.weight"/>
+      
+      <delay value=1>
+    </event_properties>
+    
+
+        
+            
+	 
+ </Connections>
+
+
+<!-- for comparison -->
+        <let parameter="p1" value="2"/>
+		<let parameter="p2"><from_file file="p1values.txt" index="i"/></let>
+		<let parameter="p3"><from_list values="1,2,3,4" index="i % 4"/></let>
+        <!--  -->
+
+<!--
+in the following connectors, the 
+src.property
+
+<connections>
+  <AllToAllConnector allow_self_connections> implicit ordering by "source", then "target"
+  <OneToOneConnector>
+  <FixedProbabilityConnector p_connect, allow_self_connections=True>
+  <FixedNumberPreConnector n, allow_self_connections=True,>
+  <FixedNumberPostConnector n, allow_self_connections=True,>
+  <DistanceDependentProbabilityConnector>
+  <FromListConnector>
+  <FromFileConnector>
+  <CSAConnector>
+
+  <PairwiseBooleanExpression if='i<j' index_order=>
+  <PairwiseProbabilisticExpression p=' '>
+
+  <StevesMondoConnector>
+      
+</connections>
+
+
+
+
+</LemsLiteNetwork>
