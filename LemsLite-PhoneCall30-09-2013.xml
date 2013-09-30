@@ -1,0 +1,180 @@
+
+<!-- Builtin functions:
+
+A?B:C, (for v2)
+'and' 'or' 'not'?
+
+abs, clip
+floor, ceil, round,
+sin cos, tan
+sqrt, power (^)?, exp, log (=log10), ln, 
+
+uniform(), gaussian/normal(), 
+
+clip(x,min,max) = 
+
+-->
+
+
+
+<!-- 
+<Array name='weights'> <extract_column index=0> <from id='f'/> </extract_column>  </Array>
+<Array name='weights'> <ExtractColumn  column='1' > <FileSource file='f' > </FileSource> </ExtractColumn> </Array>
+
+<Array name='stim'>  <FileSource file='f2' flatten_by='row,column'> </FileSource>  </Array>
+<Array name='stim'> <Flatten2d  by='row,column'> <FileSource file='f2' > </FileSource> </Flatten2d> </Array>
+<Array name='weights'> <ExtractColumn  column='1' > <FileSource file='f' > </FileSource> </ExtractColumn> </Array>
+-->
+
+
+
+
+
+
+<LemsLiteNetwork>
+
+
+<!--  define all the external references here, so the processor knows what
+to expect. Eg, if we're distributing the instantiation across different nodes, we 
+may want to copy these files around, with each knowing the offset for its cells -->
+    
+
+
+
+
+<DataSources>
+	<File name="misc1.txt" id='f' format='csv' shape=(3,1) />
+
+    <!-- think about how to specify column-wise first or row-wise unambiguously -->
+    <!-- pixel intensities always run from 0-1, channel can be 'red','green' or 'blue' or 'grey' values  -->
+    <File name="misc1.png" id='f2' format='img' shape=(400,300) flatten_by='column,row' channel='r',  />
+
+    
+    <Array name='weights'> <FileSource file='f' column='1' > </FileSource> </Array>
+    <Array name='weights'> <FileSource column='0' > </FileSource> </Array>
+    <Array name='weights'> <ListSource values='1,2,3' > 1,2,3,4 </ListSource> </Array>
+
+
+    <ListArray values='1,2,3,4,5'  name='delays'> </ListArray>
+    
+</DataSources>
+
+
+
+<ComponentArray name="pop1" component="cell1" size="200">
+    <!--  Populations are always indexed.
+      'i' is defined for all items in the population and can
+     be used in other expressions -->
+    
+	<BuildtimeProperties>
+		<!--  these are things that are used for set up but don't need to be 
+				stored while running. The instance properties can depend on these,
+				as well as any connection properties -->
+
+        <!-- Things that can be used are: 'i' or 'N' -->
+        
+		<var name="x" value="0.1 * (i / 50)"/>
+		<var name="y" value="0.1 * floor(i / 50) + x"/>
+		<var name="h" value="1 + 0.5 * random()"/>
+
+
+        <!-- Either of these is OK: -->
+        <var name="x" value="0.1 * (i / 50)"/>
+        
+        <var name="x" array='asd'/> 
+		
+	</BuildtimeProperties> 
+
+
+	<RuntimeProperties>
+		<!--  these are needed while running: they have a 'parameter' attribute
+		which refers to a parameter that must be defined in the component model,
+		as opposed to the 'name' parameter for the transients that adds a new 
+		named variable to the scope -->
+
+         <!-- Things that can be used are: 'i' or 'N' -->
+    
+        <let parameter="p1" value="x -i +N +m"/>
+        <let parameter="p2" array="weights" />
+
+        
+			
+	</RuntimeProperties>
+
+
+    
+
+</ComponentArray>
+
+
+<!-- One of these: -->
+<connections>
+  <AllToAllConnector allow_self_connections>
+  <OneToOneConnector>
+  <FixedProbabilityConnector p_connect, allow_self_connections=True>
+  <FixedNumberPreConnector n, allow_self_connections=True,>
+  <FixedNumberPostConnector n, allow_self_connections=True,>
+  <DistanceDependentProbabilityConnector>
+  <CSAConnector>
+
+  <!-- shoudl be able to access any build-time variables, for example,
+  -->
+  (source.y + target.x < 100)
+  <PairwiseBooleanExpression >
+  <PairwiseProbabilisticExpression>
+  
+  <StevesMondoConnector>
+  <OtherCustomConnector>
+</connections>
+<!-- One of these: -->
+
+
+ 
+ <EventConnections from="pop1" to="pop2"  >
+
+    <EventSource port="on_spike"/>
+	<EventTarget port="on_recv_ampa"/>
+
+
+ 	  <SourceTargetConnector>
+ 		<AllAllConnector />
+ 		<!--  to assign an index to each connection, we need to know whether to 
+ 		iterate over sources or targets for the outer loop -->
+ 	  </SourceTargetConnector>
+
+    
+
+
+
+	  <ConnectionProperties>
+        <!--  here, source.index, target.index and i are always available -->
+        <!-- 'i' is the index of the connection -->
+
+
+
+	  	<var name="weight" array='weights'/>
+	  	<var name="x" array='asds'/>
+	  		
+	  	<var name="a" value="(source.x - target.x)"/>
+	  	<var name="dx" value= "source.x - target.x"/>
+	  	<var name="dy" value= "source.y - target.y"/>
+	  	<var name="d"  value= "sqrt(dx * dx + dy * dy)"/>
+
+
+        <Property name="connection_weight" value="weight * d"/>
+        <Property name="scaling_factor" value="2.0"/>
+        
+        <Delay value="d"/>
+
+            
+	  </ConnectionProperties>
+
+
+
+    <EventArguments>
+        <Arg name="weight" value="connection.weight * connection.scaling_factor + source_port.src_voltage"/>
+    </EventArguments>
+
+ </EventConnections>
+
+
