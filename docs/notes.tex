@@ -1,0 +1,181 @@
+\documentclass[11pt,a4paper]{report}
+
+
+\usepackage{listings}
+\usepackage{inconsolata}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{enumitem}
+
+
+
+
+
+
+%% This allows us to use lstlistings inside list-descriptions:
+\makeatletter
+\let\orig@item\item
+
+\def\item{%
+    \@ifnextchar{[}%
+        {\lstinline@item}%
+        {\orig@item}%
+}
+
+\begingroup
+\catcode`\]=\active
+\gdef\lstinline@item[{%
+    \setbox0\hbox\bgroup
+        \catcode`\]=\active
+        \let]\lstinline@item@end
+}
+\endgroup
+\def\lstinline@item@end{%
+    \egroup
+    \orig@item[\usebox0]%
+}
+\makeatother
+
+%% ============================================================
+
+
+
+
+
+
+\lstset{basicstyle=\ttfamily}
+
+
+
+
+\newenvironment{codedescription}{%
+   \setdescription{leftmargin=\parindent,labelindent=\parindent}
+   \renewcommand\descriptionlabel[1]{\hspace{\labelsep}##1 --}
+   \begin{description}%
+}{%
+   \end{description}%
+}
+
+
+
+
+
+
+\begin{document}
+
+\chapter{Notes on LEMS Lite syntax}
+
+\section{ComponentArrays}
+
+\section{Connectors}
+
+
+\subsubsection{Builtin Connector Types}
+
+\begin{codedescription}
+    \item[\lstinline|<AllToAll|] sdf
+    \item[\lstinline|<AllToAllConnector allow_self_connections="false">|] jkl
+    \item[\lstinline|<OneToOneConnector|]  jkl
+    \item[\lstinline|<FixedProbabilityConnector p_connect, allow_self_connections=True>|] jkl
+    \item[\lstinline|<FixedNumberPreConnector n, allow_self_connections=True,>|] jl
+    \item[\lstinline|<FixedNumberPostConnector n, allow_self_connections=True,>|] jkl
+    \item[\lstinline|<DistanceDependentProbabilityConnector>|] jkl
+    \item[\lstinline|<FromListConnector>|] jkl
+    \item[\lstinline|<FromFileConnector>|] jkl
+    \item[\lstinline|<CSAConnector>|] jkl
+\end{codedescription}
+
+
+
+%<connect dst_param="weight" value="from_file:my_weights.txt"/>
+%<connect dst_param="weight" value="from_list:my_weights.txt"/>
+%<connect dst_param="weight" value="from_expression:my_weights.txt"/>
+%<connect dst_param="weight" value="fixed:1.0"/>
+%
+%
+%
+%
+%<connections>
+%  <PyNN:AllToAllConnector allow_self_connections>
+%  <PyNN:OneToOneConnector>
+%  <PyNN:FixedProbabilityConnector p_connect, allow_self_connections=True>
+%  <PyNN:FixedNumberPreConnector n, allow_self_connections=True,>
+%  <PyNN:FixedNumberPostConnector n, allow_self_connections=True,>
+%  <PyNN:DistanceDependentProbabilityConnector>
+%  <PyNN:FromListConnector>
+%  <PyNN:FromFileConnector>
+%  <PyNN:CSAConnector>
+%
+%  <PairwiseBooleanExpression >
+%  <PairwiseProbabilisticExpression>
+%  
+%  <StevesMondoConnector>
+%</connections>
+
+
+
+
+\section{Tags for specifying Parameter values}
+
+
+%<from_expression sample="0.5" />
+%<from_expression sample="sin((i,j)) + uniform(a,b)" />
+%<from_list values="[]" />
+%<from_file format='flat' filename="" />
+
+
+
+
+
+\section{Mathematical Expressions}
+
+
+
+\subsubsection{Operators}
+
+What to do about ternary operator?
+
+
+
+\subsubsection{Standard Library functions}
+\lstset{language=C}
+
+\begin{codedescription}
+\item[\lstinline|clip(x,x_min,x_max)|] asdf
+\item[\lstinline|clip_max(x,x_max)|] asdf
+\item[\lstinline|clip_min(x,x_min)|]  asdf
+\vspace{0.25cm}
+\item[\lstinline|abs(x)|]  ....
+\item[\lstinline|floor(x)|] ...
+\item[\lstinline|ceil(x)|]  ...
+\item[\lstinline|round(x)|]  ...
+\vspace{0.25cm}
+\item[\lstinline|sqrt(x)|]  ...
+\item[\lstinline|power(x, y)|]  ...
+\item[\lstinline|exp(x)|]  ...
+\item[\lstinline|log(x)|]  (log10)
+\item[\lstinline|ln(x)|]  ...
+\vspace{0.25cm}
+\item[\lstinline|sin(x)|]  ... (in rads or degs?)
+\item[\lstinline|cos(x)|]  ... (in rads or degs?)
+\item[\lstinline|tan(x)|]  ... (in rads or degs?)
+\end{codedescription}
+
+What about constants - PI and e?
+
+
+
+
+\subsubsection{Random Numbers}
+
+\lstset{language=C}
+\begin{codedescription}
+\item[\lstinline|uniform(a,b)|] Uniform numbers between a,b
+\item[\lstinline|normal(mean,stddev)|] 
+\end{codedescription}
+
+
+
+
+\end{document}
