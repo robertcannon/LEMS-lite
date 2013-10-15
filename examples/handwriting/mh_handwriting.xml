@@ -1,3 +1,6 @@
+<!-- How do we cope with recordings spikes or analog traces -->
+
+
 <LEMS_lite>
 
     <!-- Components -->
@@ -7,7 +10,6 @@
             <Parameter name="bias"/>
             <Parameter name="gain"/>
             <Parameter name="constInput"/>
-            <Parameter name="constImg"/>
             
             <InputEventPort name="spike-in">
                 <Parameter name="weight"/>
@@ -62,75 +64,161 @@
     <DataSources>
         <File name="src_img.txt" id='f_src_img' format='csv' shape="(784,1)" />
 
-        <File name="b1.txt" id='f_b1' format='flatfile' shape=(1,3000)/>
-        <File name="b2.txt" id='f_b2' format='flatfile' shape=(1,1500)/>
-        <File name="b3.txt" id='f_b3' format='flatfile' shape=(1,900)/>
-        <File name="b4.txt" id='f_b4' format='flatfile' shape=(1,150)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level0" id='f_params_pop0' format='csv' shape=(5,3000)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level1" id='f_params_pop1' format='csv' shape=(5,1500)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level2" id='f_params_pop2' format='csv' shape=(5,900)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level3" id='f_params_pop3' format='csv' shape=(5,152)/>
 
-        <File name="w1.txt" id='f_w1' format='flatfile' shape=(784,3000)/>
-        <File name="w2.txt" id='f_w2' format='flatfile' shape=(3000,1500)/>
-        <File name="w3.txt" id='f_w3' format='flatfile' shape=(1500,900)/>
-        <File name="w4.txt" id='f_w4' format='flatfile' shape=(900,150)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_0_1" id='f_conns_pop0_pop1' format='csv' shape=(3,?)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_1_2" id='f_conns_pop1_pop2' format='csv' shape=(3,?)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_2_3" id='f_conns_pop2_pop3' format='csv' shape=(3,?)/>
 
-        <!-- and into arrays: -->
-        <Array name='img'> <FileSource file='f_src_img'/> </Array>
-        
-        <Array name='w1'> <FileSource file='f_w1'/> </Array>
-        <Array name='w2'> <FileSource file='f_w2'/> </Array>
-        <Array name='w3'> <FileSource file='f_w3'/> </Array>
-        <Array name='w4'> <FileSource file='f_w4'/> </Array>
-        
-        <Array name='b1'> <FileSource file='f_b1'/> </Array>
-        <Array name='b2'> <FileSource file='f_b2'/> </Array>
-        <Array name='b3'> <FileSource file='f_b3'/> </Array>
-        <Array name='b4'> <FileSource file='f_b4'/> </Array>
 
+
+        <!-- N.B Zero based indexing -->
+
+        <!-- Population parameters: -->
+        <!-- ====================== -->
+        <!-- Pop0 -->
+        <Array name='pop0_bias'>       <FileSource file='f_params_pop0' column='1'/> </Array>
+        <Array name='pop0_gain'>       <FileSource file='f_params_pop0' column='2'/> </Array>
+        <Array name='pop0_constInput'> <FileSource file='f_params_pop0' column='3'/> </Array>
+        <Array name='pop0_inp'>        <FileSource file='f_params_pop0' column='4'/> </Array>
+
+        <!-- Pop1 -->
+        <Array name='pop1_bias'>       <FileSource file='f_params_pop1' column='1'/> </Array>
+        <Array name='pop1_gain'>       <FileSource file='f_params_pop1' column='2'/> </Array>
+        <Array name='pop1_constInput'> <FileSource file='f_params_pop1' column='3'/> </Array>
+        <Array name='pop1_inp'>        <FileSource file='f_params_pop1' column='4'/> </Array>
+
+        <!-- Pop2 -->
+        <Array name='pop2_bias'>       <FileSource file='f_params_pop2' column='1'/> </Array>
+        <Array name='pop2_gain'>       <FileSource file='f_params_pop2' column='2'/> </Array>
+        <Array name='pop2_constInput'> <FileSource file='f_params_pop2' column='3'/> </Array>
+        <Array name='pop2_inp'>        <FileSource file='f_params_pop2' column='4'/> </Array>
+
+        <!-- Pop3 -->
+        <Array name='pop3_bias'>       <FileSource file='f_params_pop3' column='1'/> </Array>
+        <Array name='pop3_gain'>       <FileSource file='f_params_pop3' column='2'/> </Array>
+        <Array name='pop3_constInput'> <FileSource file='f_params_pop3' column='3'/> </Array>
+        <Array name='pop3_inp'>        <FileSource file='f_params_pop3' column='4'/> </Array>
+
+
+        <!-- Connection weights: -->
+        <!-- ====================== -->
+        <!-- Pop0 to Pop1 -->
+        <Array name='conn01_pre'>    <FileSource file='f_conns_pop0_pop1' column='0'/> </Array>
+        <Array name='conn01_post'>   <FileSource file='f_conns_pop0_pop1' column='1'/> </Array>
+        <Array name='conn01_weight'> <FileSource file='f_conns_pop0_pop1' column='2'/> </Array>
+
+        <!-- Pop1 to Pop2 -->
+        <Array name='conn12_pre'>    <FileSource file='f_conns_pop1_pop2' column='0'/> </Array>
+        <Array name='conn12_post'>   <FileSource file='f_conns_pop1_pop2' column='1'/> </Array>
+        <Array name='conn12_weight'> <FileSource file='f_conns_pop1_pop2' column='2'/> </Array>
+
+        <!-- Pop2 to Pop3 -->
+        <Array name='conn23_pre'>    <FileSource file='f_conns_pop2_pop3' column='0'/> </Array>
+        <Array name='conn23_post'>   <FileSource file='f_conns_pop2_pop2' column='1'/> </Array>
+        <Array name='conn23_weight'> <FileSource file='f_conns_pop2_pop3' column='2'/> </Array>
+
+        <!-- This would be more efficient: -->
+        <!-- 
         <Array name='bias'> <ListSource values='10.31933, 5.94921, 0.63964'/> </Array>
         <Array name='gain'> <ListSource values='8.7792, 1.37988, 10.0195'/> </Array>
-        
+        -->
     </DataSources>
 
 
-    <ComponentArray name="level1" component="lif_neuron" size="3000">
-        <let parameter="constImg" array="img"/>
-        <let parameter="constInput" array="b1"/>
-        <let parameter="bias" array="bias" index='i%3'/>
-        <let parameter="gain" array="gain" index='i%3'/>
+    <ComponentArray name="level0" component="lif_neuron" size="3000">
+        <let parameter="constInput" array="pop0_constInput"/>
+        <let parameter="bias" array="pop0_bias"/>
+        <let parameter="gain" array="pop0_gain"/>
+
+        <!-- OK?  (let?)-->
+        <initialise state_variable="inp" array="pop0_constInput" />
+    </ComponentArray>
+
+    <ComponentArray name="level1" component="lif_neuron" size="1500">
+        <let parameter="constInput" array="pop1_constInput"/>
+        <let parameter="bias" array="pop1_bias"/>
+        <let parameter="gain" array="pop1_gain"/>
+
+        <!-- OK?  (let?)-->
+        <initialise state_variable="inp" array="pop1_constInput" />
+    </ComponentArray>
+
+    <ComponentArray name="level2" component="lif_neuron" size="900">
+        <let parameter="constInput" array="pop2_constInput"/>
+        <let parameter="bias" array="pop2_bias"/>
+        <let parameter="gain" array="pop2_gain"/>
+
+        <!-- OK?  (let?)-->
+        <initialise state_variable="inp" array="pop2_constInput" />
+    </ComponentArray>
+
+
+    <ComponentArray name="level3" component="lif_neuron" size="150">
+        <let parameter="constInput" array="pop3_constInput"/>
+        <let parameter="bias" array="pop3_bias"/>
+        <let parameter="gain" array="pop3_gain"/>
+
+        <!-- OK?  (let?)-->
+        <initialise state_variable="inp" array="pop3_constInput" />
+    </ComponentArray>
+
+
+
+    <!-- Connect Pop0 to Pop1 -->
+    <EventConnections from="level0" to="level1">
+        <EventSource port="spike-out"/>
+        <EventTarget port="spike-in"/>
+
+        <SourceTargetConnector> <FromArrayConnector pre="conn01_pre" post="conn01_post"/> </SourceTargetConnector>
+
+        <ConnectionProperties>
+            <Property name="weight" array="conn01_weight"/>
+            <Delay value="0"/>
+        </ConnectionProperties>
+
+        <EventArguments>
+            <Arg name="weight" value="connection.weight"/>
+        </EventArguments>
         
-    </ComponentArray>
-    
-    <ComponentArray name="level2" component="lif_neuron" size="1500">
-        <let parameter="constImg" value="0"/>
-        <let parameter="constInput" array="b2"/>
-        <let parameter="bias" array="bias" index='i%3'/>
-        <let parameter="gain" array="gain" index='i%3'/>
-    </ComponentArray>
-
-    <ComponentArray name="level3" component="lif_neuron" size="900">
-        <let parameter="constImg" value="0"/>
-        <let parameter="constInput" array="b3"/>
-        <let parameter="bias" array="bias" index='i%3'/>
-        <let parameter="gain" array="gain" index='i%3'/>
-    </ComponentArray>
-    
-    <ComponentArray name="level4" component="lif_neuron" size="150">
-        <let parameter="constImg" value="0"/>
-        <let parameter="constInput" array="b4"/>
-        <let parameter="bias" array="bias" index='i%3'/>
-        <let parameter="gain" array="gain" index='i%3'/>
-    </ComponentArray>
+    </EventConnections>
 
 
 
 
+    <!-- Connect Pop1 to Pop2 -->
     <EventConnections from="level1" to="level2">
         <EventSource port="spike-out"/>
         <EventTarget port="spike-in"/>
 
-        <SourceTargetConnector> <AllAllConnector /> <SourceTargetConnector>
+        <SourceTargetConnector> <FromArrayConnector pre="conn12_pre" post="conn12_post"/> </SourceTargetConnector>
 
         <ConnectionProperties>
-            <Property name="weight" array="w1"/>
+            <Property name="weight" array="conn12_weight"/>
+            <Delay value="0"/>
+        </ConnectionProperties>
+
+        <EventArguments>
+            <Arg name="weight" value="connection.weight"/>
+        </EventArguments>
+        
+    </EventConnections>
+
+
+
+
+    <!-- Connect Pop2 to Pop3 -->
+    <EventConnections from="level2" to="level3">
+        <EventSource port="spike-out"/>
+        <EventTarget port="spike-in"/>
+
+        <SourceTargetConnector> <FromArrayConnector pre="conn23_pre" post="conn23_post"/> </SourceTargetConnector>
+
+        <ConnectionProperties>
+            <Property name="weight" array="conn23_weight"/>
             <Delay value="0"/>
         </ConnectionProperties>
 
@@ -138,6 +226,9 @@
             <Arg name="weight" value="connection.weight"/>
         </EventArguments>
     </EventConnections>
+
+
+
 
 
 </LEMS_lite>

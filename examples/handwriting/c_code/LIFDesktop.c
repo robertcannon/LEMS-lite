@@ -234,10 +234,10 @@ void simulate(
 
 
 
-
+    // Write the setup of the network to a file:
+    // ==========================================
     if(dump_network_setup) {
-        // Dump out the Simulation setup:
-        cout << "\n";
+        cout << "\nWriting network setup:";
 
         vector<int> pop_sizes;
         pop_sizes.push_back(1000 * 3);
@@ -254,7 +254,6 @@ void simulate(
             pop_indices.push_back(PopulationIndices(offset, offset + pop_sizes[x]));
         }
 
-        cout << "\n";
 
         // Create the output directory:
         const string output_directory = "NetworkSetup";
@@ -263,9 +262,11 @@ void simulate(
 
         // Dump out the current parameters:
         for(size_t pop_index = 0; pop_index < pop_sizes.size(); pop_index++) {
-            stringstream filename;
-            filename << output_directory << "/" << "mh_conv_nrn_params_level" << pop_index;
-            std::ofstream of(filename.str().c_str());
+            stringstream _filename;
+            _filename << output_directory << "/" << "mh_conv_nrn_params_level" << pop_index;
+            string filename = _filename.str();
+            std::cout << "\n  -- " << filename;
+            std::ofstream of(filename.c_str());
 
             of << "# Level: " << pop_index;
             of << "\n# index, bias, gain, constInput, inp";
@@ -277,9 +278,14 @@ void simulate(
 
         //And the connections:
         for(size_t src_index = 0; src_index < pop_sizes.size() - 1; src_index++) {
-            stringstream filename;
-            filename << output_directory << "/" << "mh_conv_nrn_connections_levels_" << src_index << "_" << src_index + 1;
-            std::ofstream of(filename.str().c_str());
+            stringstream _filename;
+            _filename << output_directory << "/" << "mh_conv_nrn_connections_levels_" << src_index << "_" << src_index + 1;
+            string filename = _filename.str();
+            std::cout << "\n  -- " << filename;
+            std::ofstream of(filename.c_str());
+
+            of << "# Connections between: " << src_index << " and " << src_index + 1;
+            of << "\n# pre-index, post-index, weight ";
 
             for(int src_nrn_index = pop_indices[src_index].first; src_nrn_index < pop_indices[src_index].second; src_nrn_index++) {
                 TargetArray t = net->targets[src_nrn_index];
@@ -294,19 +300,19 @@ void simulate(
                     assert(dst_real_index_offset >= 0);
 
                     float weight = t.weights[_dst_index];
-                    of << src_nrn_index -  pop_indices[src_index].first  << " -> " << dst_real_index_offset << " (" << weight << ")" << "\n";
+                    of << src_nrn_index -  pop_indices[src_index].first  << ", " << dst_real_index_offset << ", " << weight << "\n";
                 }
             }
         }
+        cout << "\nFinished writing network setup\n\n";
     }
 
 
 
 
 
-
-
-
+    // Main simulation loop:
+    // ======================
 
     for(int t = 0; t < ms; t++) {
 
@@ -376,10 +382,10 @@ typedef struct {
     float* ref;        // Refactory period of each neuron
     float* inp;        // Input to each neuron
     float* total;      // Input after apply gain and bias
-    int* spikes;     // Spike buffer
+    int* spikes;       // Spike buffer
     float** semPtr;    // Used to map neural net output to digit
     float** samples;   // Sample images
-    int* spikeCount; // Spike count (for drawing a spike frequency plot)
+    int* spikeCount;   // Spike count (for drawing a spike frequency plot)
 } Recogniser;
 
 void assignExternalInput(Network* net, float* total, float* externalInput) {
@@ -437,7 +443,6 @@ int main() {
     Recogniser* r = createRecogniser();
     // Do recognition on 100 samples
     // The sample set contains 10 of each digit, sorted by digit.
-    //
     int expected_ans[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 4, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9};
     for(i = 0; i < 100; i++) {
         bool dump_state = (i == 0);
@@ -446,7 +451,6 @@ int main() {
         printf("%i ", ans);
 
         assert(ans == expected_ans[i]);
-        //assert(0);
 
     }
     printf("\n");
