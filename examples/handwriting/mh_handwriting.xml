@@ -1,0 +1,149 @@
+<LEMS_lite>
+
+    <!-- Components -->
+    <!-- ========== -->
+    <DiscreteUpdateComponent name='lif_neuron'>
+        <Interface>
+            <Parameter name="bias"/>
+            <Parameter name="gain"/>
+            <Parameter name="constInput"/>
+            <Parameter name="constImg"/>
+            
+            <InputEventPort name="spike-in">
+                <Parameter name="weight"/>
+            </InputEventPort>
+            
+            <OutputEventPort name="spike-out"/>            
+
+            <Constant name=one_over_rc_float value="0.15429"/>
+        </Interface>
+
+        <State>
+            <StateVariable name="v"/>
+            <StateVariable name="inp"/>
+            <StateVariable name="ref"/>
+        </State>
+
+        <Step>
+            <!-- The original code ensures that 'v > 0', but I thin kthis should be OK! -->
+            <var name="total" value="(gain * (inp + constInput + constImg)) + bias"/>
+            <var name="dv" value="(total-v) * one_over_rc_float"/>
+            <update variable="v" value="v + dv*dt"/>
+            <update variable="inp" value="inp * (1-one_over_rc_float)"/>
+            <!-- event_handling -->
+            <output variable="v" value="v"/>
+        </Step>
+
+
+        <OnEvent port='spike-in' >
+            <update variable="inp" value="inp + weight * one_over_rc_float"/>
+        </OnEvent>
+
+        
+
+        <!-- Is there a spike? -->
+        <OnCondition if="v > 1.0">
+            <update variable="v" value="0"/>
+            <update variable="ref" value="2"/>
+        </OnCondition>
+        
+        <!-- Are are in a refactory period -->
+        <OnCondition if="ref > 0">
+            <update variable="v" value="0"/>
+            <update variable="ref" value="ref-1"/>
+        </OnCondition>
+        
+    </DiscreteUpdateComponent>
+
+
+
+    <!-- Network -->
+    <!-- ======= -->
+    <DataSources>
+        <File name="src_img.txt" id='f_src_img' format='csv' shape="(784,1)" />
+
+        <File name="b1.txt" id='f_b1' format='flatfile' shape=(1,3000)/>
+        <File name="b2.txt" id='f_b2' format='flatfile' shape=(1,1500)/>
+        <File name="b3.txt" id='f_b3' format='flatfile' shape=(1,900)/>
+        <File name="b4.txt" id='f_b4' format='flatfile' shape=(1,150)/>
+
+        <File name="w1.txt" id='f_w1' format='flatfile' shape=(784,3000)/>
+        <File name="w2.txt" id='f_w2' format='flatfile' shape=(3000,1500)/>
+        <File name="w3.txt" id='f_w3' format='flatfile' shape=(1500,900)/>
+        <File name="w4.txt" id='f_w4' format='flatfile' shape=(900,150)/>
+
+        <!-- and into arrays: -->
+        <Array name='img'> <FileSource file='f_src_img'/> </Array>
+        
+        <Array name='w1'> <FileSource file='f_w1'/> </Array>
+        <Array name='w2'> <FileSource file='f_w2'/> </Array>
+        <Array name='w3'> <FileSource file='f_w3'/> </Array>
+        <Array name='w4'> <FileSource file='f_w4'/> </Array>
+        
+        <Array name='b1'> <FileSource file='f_b1'/> </Array>
+        <Array name='b2'> <FileSource file='f_b2'/> </Array>
+        <Array name='b3'> <FileSource file='f_b3'/> </Array>
+        <Array name='b4'> <FileSource file='f_b4'/> </Array>
+
+        <Array name='bias'> <ListSource values='10.31933, 5.94921, 0.63964'/> </Array>
+        <Array name='gain'> <ListSource values='8.7792, 1.37988, 10.0195'/> </Array>
+        
+    </DataSources>
+
+
+    <ComponentArray name="level1" component="lif_neuron" size="3000">
+        <let parameter="constImg" array="img"/>
+        <let parameter="constInput" array="b1"/>
+        <let parameter="bias" array="bias" index='i%3'/>
+        <let parameter="gain" array="gain" index='i%3'/>
+        
+    </ComponentArray>
+    
+    <ComponentArray name="level2" component="lif_neuron" size="1500">
+        <let parameter="constImg" value="0"/>
+        <let parameter="constInput" array="b2"/>
+        <let parameter="bias" array="bias" index='i%3'/>
+        <let parameter="gain" array="gain" index='i%3'/>
+    </ComponentArray>
+
+    <ComponentArray name="level3" component="lif_neuron" size="900">
+        <let parameter="constImg" value="0"/>
+        <let parameter="constInput" array="b3"/>
+        <let parameter="bias" array="bias" index='i%3'/>
+        <let parameter="gain" array="gain" index='i%3'/>
+    </ComponentArray>
+    
+    <ComponentArray name="level4" component="lif_neuron" size="150">
+        <let parameter="constImg" value="0"/>
+        <let parameter="constInput" array="b4"/>
+        <let parameter="bias" array="bias" index='i%3'/>
+        <let parameter="gain" array="gain" index='i%3'/>
+    </ComponentArray>
+
+
+
+
+    <EventConnections from="level1" to="level2">
+        <EventSource port="spike-out"/>
+        <EventTarget port="spike-in"/>
+
+        <SourceTargetConnector> <AllAllConnector /> <SourceTargetConnector>
+
+        <ConnectionProperties>
+            <Property name="weight" array="w1"/>
+            <Delay value="0"/>
+        </ConnectionProperties>
+
+        <EventArguments>
+            <Arg name="weight" value="connection.weight"/>
+        </EventArguments>
+    </EventConnections>
+
+
+</LEMS_lite>
+
+
+
+
+
+ 
