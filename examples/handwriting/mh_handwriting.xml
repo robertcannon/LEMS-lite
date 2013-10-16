@@ -27,12 +27,21 @@
         </State>
 
         <Step>
+
+            
+            
             <!-- The original code ensures that 'v > 0', but I thin kthis should be OK! -->
             <var name="total" value="(gain * (inp + constInput + constImg)) + bias"/>
+            <!-- Recieve event here -->
             <var name="dv" value="(total-v) * one_over_rc_float"/>
             <update variable="v" value="v + dv*dt"/>
             <update variable="inp" value="inp * (1-one_over_rc_float)"/>
+
+
             <!-- event_handling -->
+            <condition_check/>
+
+            
             <output variable="v" value="v"/>
         </Step>
 
@@ -118,7 +127,8 @@
 
         <!-- Pop2 to Pop3 -->
         <Array name='conn23_pre'>    <FileSource file='f_conns_pop2_pop3' column='0'/> </Array>
-        <Array name='conn23_post'>   <FileSource file='f_conns_pop2_pop2' column='1'/> </Array>
+        <Array name='conn23_post'>   <FileSource file='f_conns_pop2_pop3' column='1'/> </Array>
+        <Array name='conn23_post'>   <FileSource file='f_conns_pop2_pop3' column='1'/> </Array>
         <Array name='conn23_weight'> <FileSource file='f_conns_pop2_pop3' column='2'/> </Array>
 
         <!-- This would be more efficient: -->
@@ -134,8 +144,7 @@
         <let parameter="bias" array="pop0_bias"/>
         <let parameter="gain" array="pop0_gain"/>
 
-        <!-- OK?  (let?)-->
-        <initialise state_variable="inp" array="pop0_constInput" />
+        <initialise state_variable="inp" array="pop0_inp" />
     </ComponentArray>
 
     <ComponentArray name="level1" component="lif_neuron" size="1500">
@@ -143,8 +152,7 @@
         <let parameter="bias" array="pop1_bias"/>
         <let parameter="gain" array="pop1_gain"/>
 
-        <!-- OK?  (let?)-->
-        <initialise state_variable="inp" array="pop1_constInput" />
+        <initialise state_variable="inp" array="pop1_inp" />
     </ComponentArray>
 
     <ComponentArray name="level2" component="lif_neuron" size="900">
@@ -152,18 +160,16 @@
         <let parameter="bias" array="pop2_bias"/>
         <let parameter="gain" array="pop2_gain"/>
 
-        <!-- OK?  (let?)-->
-        <initialise state_variable="inp" array="pop2_constInput" />
+        <initialise state_variable="inp" array="pop2_inp" />
     </ComponentArray>
 
 
-    <ComponentArray name="level3" component="lif_neuron" size="150">
+    <ComponentArray name="level3" component="lif_neuron" size="150">        
         <let parameter="constInput" array="pop3_constInput"/>
         <let parameter="bias" array="pop3_bias"/>
         <let parameter="gain" array="pop3_gain"/>
 
-        <!-- OK?  (let?)-->
-        <initialise state_variable="inp" array="pop3_constInput" />
+        <initialise state_variable="inp" array="pop3_inp" />
     </ComponentArray>
 
 
