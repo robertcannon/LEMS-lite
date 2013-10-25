@@ -285,7 +285,7 @@ void simulate(
             std::ofstream of(filename.c_str());
 
             of << "# Connections between: " << src_index << " and " << src_index + 1;
-            of << "\n# pre-index, post-index, weight ";
+            of << "\n# pre-index, post-index, weight\n";
 
             for(int src_nrn_index = pop_indices[src_index].first; src_nrn_index < pop_indices[src_index].second; src_nrn_index++) {
                 TargetArray t = net->targets[src_nrn_index];
