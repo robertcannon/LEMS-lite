@@ -17,7 +17,8 @@
             
             <OutputEventPort name="spike-out"/>            
 
-            <Constant name=one_over_rc_float value="0.15429"/>
+            <Constant name="one_over_rc_float" value="0.15429"/>
+            <Constant name="dt" value="0.1E-3"/>
         </Interface>
 
         <State>
@@ -31,7 +32,7 @@
             
             
             <!-- The original code ensures that 'v > 0', but I thin kthis should be OK! -->
-            <var name="total" value="(gain * (inp + constInput + constImg)) + bias"/>
+            <var name="total" value="(gain * (inp + constInput)) + bias"/>
             <!-- Recieve event here -->
             <var name="dv" value="(total-v) * one_over_rc_float"/>
             <update variable="v" value="v + dv*dt"/>
@@ -53,13 +54,13 @@
         
 
         <!-- Is there a spike? -->
-        <OnCondition if="v > 1.0">
+        <OnCondition if="v .gt. 1.0">
             <update variable="v" value="0"/>
             <update variable="ref" value="2"/>
         </OnCondition>
         
         <!-- Are are in a refactory period -->
-        <OnCondition if="ref > 0">
+        <OnCondition if="ref .gt. 0">
             <update variable="v" value="0"/>
             <update variable="ref" value="ref-1"/>
         </OnCondition>
@@ -73,14 +74,14 @@
     <DataSources>
         <File name="src_img.txt" id='f_src_img' format='csv' shape="(784,1)" />
 
-        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level0" id='f_params_pop0' format='csv' shape=(5,3000)/>
-        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level1" id='f_params_pop1' format='csv' shape=(5,1500)/>
-        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level2" id='f_params_pop2' format='csv' shape=(5,900)/>
-        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level3" id='f_params_pop3' format='csv' shape=(5,152)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level0" id='f_params_pop0' format='csv' shape="(5,3000)"/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level1" id='f_params_pop1' format='csv' shape="(5,1500)"/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level2" id='f_params_pop2' format='csv' shape="(5,900)"/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_params_level3" id='f_params_pop3' format='csv' shape="(5,152)"/>
 
-        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_0_1" id='f_conns_pop0_pop1' format='csv' shape=(3,?)/>
-        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_1_2" id='f_conns_pop1_pop2' format='csv' shape=(3,?)/>
-        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_2_3" id='f_conns_pop2_pop3' format='csv' shape=(3,?)/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_0_1" id='f_conns_pop0_pop1' format='csv' shape="(3,?)"/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_1_2" id='f_conns_pop1_pop2' format='csv' shape="(3,?)"/>
+        <File name="c_code/NetworkSetup/mh_conv_nrn_connections_levels_2_3" id='f_conns_pop2_pop3' format='csv' shape="(3,?)"/>
 
 
 
