@@ -19,6 +19,8 @@
 
             <Constant name="one_over_rc_float" value="0.15429"/>
             <Constant name="dt" value="0.1E-3"/>
+
+            <OutputVariable name="v"/>
         </Interface>
 
         <State>
@@ -72,7 +74,7 @@
     <!-- Network -->
     <!-- ======= -->
     <DataSources>
-        <File name="src_img.txt" id='f_src_img' format='csv' shape="(784,1)" />
+        <!-- <File name="src_img.txt" id='f_src_img' format='csv' shape="(784,1)" /> -->
 
         <File name="c_code/NetworkSetup/mh_conv_nrn_params_level0" id='f_params_pop0' format='csv' shape="(5,3000)"/>
         <File name="c_code/NetworkSetup/mh_conv_nrn_params_level1" id='f_params_pop1' format='csv' shape="(5,1500)"/>
