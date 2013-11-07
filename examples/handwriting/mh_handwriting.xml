@@ -59,6 +59,7 @@
         <OnCondition if="v .gt. 1.0">
             <update variable="v" value="0"/>
             <update variable="ref" value="2"/>
+            <emit port="spike-out"/>
         </OnCondition>
         
         <!-- Are are in a refactory period -->
