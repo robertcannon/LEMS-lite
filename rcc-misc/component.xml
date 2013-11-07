@@ -41,7 +41,9 @@
     </Step>
      
      <OnCondition if="vpr .lt. threshold && v .gt. threshold">
-	    <emit port="spike-out"/>
+	    <emit port="spike-out">
+            <parameter name='src_voltage' value='V'/>
+            </emit>
         <update variable="v" value="reset"/>
      </OnCondition>
 

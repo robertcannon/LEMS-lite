@@ -1,6 +1,7 @@
 
 
 
+all: Sim Sim-hdfjive
 
 Sim: Handwriting.h LIFDesktop.c
 	g++ -Wall -O2 -g LIFDesktop.c -o Sim
@@ -17,5 +18,5 @@ TextToBin:
 clean:
 	rm -f Handwriting.h
 	rm -f TextToBin
-	rm -f Sim
+	rm -f Sim Sim-hdfjive
 	rm -rf NetworkSetup/
