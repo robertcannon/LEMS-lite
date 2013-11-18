@@ -179,7 +179,7 @@
 
 
     <!-- Connect Pop0 to Pop1 -->
-    <EventConnections from="level0" to="level1">
+    <EventConnections name="pop0_to_pop1" from="level0" to="level1">
         <EventSource port="spike-out"/>
         <EventTarget port="spike-in"/>
 
@@ -200,7 +200,7 @@
 
 
     <!-- Connect Pop1 to Pop2 -->
-    <EventConnections from="level1" to="level2">
+    <EventConnections name="pop1_to_pop2" from="level1" to="level2">
         <EventSource port="spike-out"/>
         <EventTarget port="spike-in"/>
 
@@ -221,7 +221,7 @@
 
 
     <!-- Connect Pop2 to Pop3 -->
-    <EventConnections from="level2" to="level3">
+    <EventConnections name="pop2_to_pop3" from="level2" to="level3">
         <EventSource port="spike-out"/>
         <EventTarget port="spike-in"/>
 
