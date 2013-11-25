@@ -237,6 +237,23 @@
 
 
 
+    
+    
+    <Simulation name='handwriting_simulation' dt='0.1e-3' duration='1.0'>
+        <OutputFiles>
+            <File id='f_out1_hdf' name='' format='hdf5'></File>
+            <File id='f_out2_csv' name='' format='csv'></File>
+            
+        </OutputFiles>
+
+        <Recording>
+            <Record file='f_out1_hdf' component_array='pop1' indices='0,1,2,3' variable='V'></Record>
+
+            <Record file='f_out2_csv' component_array='pop2' indices='0,1,2,3' variable='i'></Record>
+        </Recording>
+    
+    </Simulation>
+
 
 </LEMS_lite>
 
