@@ -18,9 +18,10 @@
             <OutputEventPort name="spike-out"/>            
 
             <Constant name="one_over_rc_float" value="0.15429"/>
-            <Constant name="dt" value="0.1E-3"/>
 
-            <OutputVariable name="v"/>
+
+            <RecordableVariable name="v"/>
+
         </Interface>
 
         <State>
@@ -34,32 +35,32 @@
             
             
             <!-- The original code ensures that 'v > 0', but I thin kthis should be OK! -->
-            <var name="total" value="(gain * (inp + constInput)) + bias"/>
+            <Var name="total" value="(gain * (inp + constInput)) + bias"/>
             <!-- Recieve event here -->
-            <var name="dv" value="(total-v) * one_over_rc_float"/>
-            <update variable="v" value="v + dv*dt"/>
-            <update variable="inp" value="inp * (1-one_over_rc_float)"/>
+            <Var name="dv" value="(total-v) * one_over_rc_float"/>
+            <Update variable="v" value="v + dv*dt"/>
+            <Update variable="inp" value="inp * (1-one_over_rc_float)"/>
 
 
             <!-- event_handling -->
-            <condition_check/>
+            <ConditionCheck/>
 
             
-            <output variable="v" value="v"/>
+            <Output variable="v" value="v"/>
         </Step>
 
 
         <OnEvent port='spike-in' >
-            <update variable="inp" value="inp + weight * one_over_rc_float"/>
+            <Update variable="inp" value="inp + weight * one_over_rc_float"/>
         </OnEvent>
 
         
 
         <!-- Is there a spike? -->
         <OnCondition if="v .gt. 1.0">
-            <update variable="v" value="0"/>
-            <update variable="ref" value="2"/>
-            <emit port="spike-out"/>
+            <Update variable="v" value="0"/>
+            <Update variable="ref" value="2"/>
+            <Emit port="spike-out"/>
         </OnCondition>
         
         <!-- Are are in a refactory period -->
@@ -144,36 +145,36 @@
 
 
     <ComponentArray name="level0" component="lif_neuron" size="3000">
-        <let parameter="constInput" array="pop0_constInput"/>
-        <let parameter="bias" array="pop0_bias"/>
-        <let parameter="gain" array="pop0_gain"/>
+        <Let parameter="constInput" array="pop0_constInput"/>
+        <Let parameter="bias" array="pop0_bias"/>
+        <Let parameter="gain" array="pop0_gain"/>
 
-        <initialise state_variable="inp" array="pop0_inp" />
+        <Initialize state_variable="inp" array="pop0_inp" />
     </ComponentArray>
 
     <ComponentArray name="level1" component="lif_neuron" size="1500">
-        <let parameter="constInput" array="pop1_constInput"/>
-        <let parameter="bias" array="pop1_bias"/>
-        <let parameter="gain" array="pop1_gain"/>
+        <Let parameter="constInput" array="pop1_constInput"/>
+        <Let parameter="bias" array="pop1_bias"/>
+        <Let parameter="gain" array="pop1_gain"/>
 
-        <initialise state_variable="inp" array="pop1_inp" />
+        <Initialize state_variable="inp" array="pop1_inp" />
     </ComponentArray>
 
     <ComponentArray name="level2" component="lif_neuron" size="900">
-        <let parameter="constInput" array="pop2_constInput"/>
-        <let parameter="bias" array="pop2_bias"/>
-        <let parameter="gain" array="pop2_gain"/>
+        <Let parameter="constInput" array="pop2_constInput"/>
+        <Let parameter="bias" array="pop2_bias"/>
+        <Let parameter="gain" array="pop2_gain"/>
 
-        <initialise state_variable="inp" array="pop2_inp" />
+        <Initialize state_variable="inp" array="pop2_inp" />
     </ComponentArray>
 
 
     <ComponentArray name="level3" component="lif_neuron" size="150">        
-        <let parameter="constInput" array="pop3_constInput"/>
-        <let parameter="bias" array="pop3_bias"/>
-        <let parameter="gain" array="pop3_gain"/>
+        <Let parameter="constInput" array="pop3_constInput"/>
+        <Let parameter="bias" array="pop3_bias"/>
+        <Let parameter="gain" array="pop3_gain"/>
 
-        <initialise state_variable="inp" array="pop3_inp" />
+        <Initialize state_variable="inp" array="pop3_inp" />
     </ComponentArray>
 
 
@@ -242,23 +243,47 @@
 
     
     
-    <Simulation name='handwriting_simulation' dt='0.1e-3' duration='1.0'>
+    <Simulation name='handwriting_simulation' dt='0.1e-3' end_time='1.0'>
         <OutputFiles>
-            <File id='f_out1_hdf' name='' format='hdf5'></File>
-            <File id='f_out2_csv' name='' format='csv'></File>
-            
+            <File id='f_out1_hdf' name='f_out_i.hdf' format='hdf5'></File>
+            <File id='f_out2_csv' name='f_out_i.csv' format='csv'></File>
+            <File id='f_out3_csv' name='f_out_spikes.csv' format='csv'></File>
         </OutputFiles>
 
-        <Recording>
-            <Record file='f_out1_hdf' component_array='pop1' indices='0,1,2,3' variable='V'></Record>
 
-            <Record file='f_out2_csv' component_array='pop2' indices='0,1,2,3' variable='i'></Record>
+
+
+        <Recording start_time="" end_time="" interval="0.1">
+            <RecordVariable file='f_out1_hdf' component_array='pop1' indices='1,2,3, 4:45:2, -10:-1:1' variable='V'/>
+
+            <RecordVariable file='f_out2_csv' component_array='pop1' variable='i'/>
+            <RecordVariable file='f_out2_csv' component_array='pop2' indices='30:50' variable='i'/>
+
+            <RecordInputEvent file='f_out3_flat' component_array='pop2' indices='0,1,2,3' portname='spike_in'/>
+            <RecordOutputEvent file='f_out3_flat' component_array='pop2' indices='0,1,2,3' portname='spike_out'/>
+            
+            
         </Recording>
     
     </Simulation>
 
 
 </LEMS_lite>
+
+
+<!-- 
+
+#Rob:
+#Time, index
+10.3 1
+10.3 2
+34.3 2
+36.7 1
+67.1 3
+
+
+
+->>
 
 
 
